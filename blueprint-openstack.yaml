@@ -1,0 +1,183 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://cloudify.co/spec/cloudify/5.0.5/types.yaml
+  - plugin:cloudify-openstack-plugin?version= >=3.2.2
+  - plugin:cloudify-utilities-plugin?version= >=1.22.1
+  # - common/common.yaml
+
+inputs:
+
+  external_network_id:
+    type: string
+    description: A network that provisions floating IPs.
+    default: GATEWAY_NET
+
+  network_id:
+    type: string
+    description: An Openstack network the VM will be connected to.
+    default: cfy-network
+
+  router_id:
+    type: string
+    description: The name of a router connected to the network.
+    default: cfy-router
+
+  image_id:
+    type: string
+    description: The UUID of desired VM image in your Openstack account.
+    default: 70de1e0f-2951-4eae-9a8f-05afd97cd036
+
+  flavor_id:
+    type: string
+    description: The UUID of desired flavor in your Openstack account.
+    default: m1.medium
+
+dsl_definitions:
+
+  openstack_config: &openstack_config
+    auth_url: { get_secret: openstack_auth_url }
+    region_name: { get_secret: openstack_region }
+    project_name: { get_secret: openstack_tenant_name }
+    username: { get_secret: openstack_username }
+    password: { get_secret: openstack_password }
+    user_domain_name: { get_secret: openstack_user_domain_name }
+    project_domain_name: { get_secret: openstack_project_domain_name }
+
+node_templates:
+
+  vm:
+    type: cloudify.nodes.openstack.Server
+    properties:
+      client_config: *openstack_config
+      agent_config:
+        install_method: remote
+        key: { get_attribute: [agent_key, private_key_export] }
+        user: centos
+      resource_config:
+        name: cfy_app_vm
+        image_id: { get_input: image_id }
+        flavor_id: { get_input: flavor_id }
+        user_data: { get_attribute: [ cloud_init, cloud_config ] }
+      use_public_ip: true
+    relationships:
+      - type: cloudify.relationships.openstack.server_connected_to_port
+        target: port
+      - type: cloudify.relationships.depends_on
+        target: cloud_init
+
+  port:
+    type: cloudify.nodes.openstack.Port
+    properties:
+      client_config: *openstack_config
+      resource_config:
+        network_id: { get_attribute: [network, id] }
+    relationships:
+      - type: cloudify.relationships.openstack.port_connected_to_subnet
+        target: subnet
+      - type: cloudify.relationships.openstack.port_connected_to_security_group
+        target: security-group
+      - type: cloudify.relationships.openstack.port_connected_to_floating_ip
+        target: ip
+
+  subnet:
+    type: cloudify.nodes.openstack.Subnet
+    properties:
+      client_config: *openstack_config
+      resource_config:
+        name: cfy_subnet
+        ip_version: 4
+        cidr: 10.10.4.0/24
+        dns_nameservers: [8.8.4.4, 8.8.8.8]
+        allocation_pools:
+        - start: 10.10.4.2
+          end: 10.10.4.254
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: network
+      - type: cloudify.relationships.openstack.subnet_connected_to_router
+        target: router
+
+  network:
+    type: cloudify.nodes.openstack.Network
+    properties:
+      client_config: *openstack_config
+      use_external_resource: true
+      resource_config:
+        name: { get_input: network_id }
+
+  router:
+    type: cloudify.nodes.openstack.Router
+    properties:
+      client_config: *openstack_config
+      use_external_resource: true
+      resource_config:
+        name: { get_input: router_id }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: external-network
+
+  security-group:
+    type: cloudify.nodes.openstack.SecurityGroup
+    properties:
+      client_config: *openstack_config
+      resource_config:
+        name: cfy_security_group
+        description: 'Security group created by Cloudify'
+      security_group_rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+
+  ip:
+    type: cloudify.nodes.openstack.FloatingIP
+    properties:
+      client_config: *openstack_config
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: external-network
+
+  external-network:
+    type: cloudify.nodes.openstack.Network
+    properties:
+      client_config: *openstack_config
+      use_external_resource: true
+      resource_config:
+        name: { get_input: external_network_id }
+        kwargs:
+          routing:
+            external: true
+
+  cloud_init:
+    type: cloudify.nodes.CloudInit.CloudConfig
+    properties:
+      resource_config:
+        users:
+        - name: centos
+          shell: /bin/bash
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          ssh-authorized-keys:
+          - { get_attribute: [agent_key, public_key_export] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: agent_key
+
+  agent_key:
+    type: cloudify.keys.nodes.RSAKey
+    properties:
+      resource_config:
+        key_name: cfy_key
+        openssh_format: true
+      use_secret_store: true
+      use_secrets_if_exist: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: keys.cloudify_ssh_key.operations.create
+          inputs:
+            store_private_key_material: true
