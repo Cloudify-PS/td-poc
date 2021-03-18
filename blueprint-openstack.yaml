@@ -3,10 +3,14 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://cloudify.co/spec/cloudify/5.0.5/types.yaml
   - plugin:cloudify-openstack-plugin?version= >=3.2.2
-  - plugin:cloudify-utilities-plugin?version= >=1.22.1
   - common/common.yaml
 
 inputs:
+
+  server_name:
+    description: The name of VM.
+    type: string
+    default: cfy_app_vm
 
   external_network_id:
     type: string
@@ -55,7 +59,7 @@ node_templates:
         key: { get_attribute: [agent_key, private_key_export] }
         user: centos
       resource_config:
-        name: cfy_app_vm
+        name: { get_input: server_name }
         image_id: { get_input: image_id }
         flavor_id: { get_input: flavor_id }
         user_data: { get_attribute: [ cloud_init, cloud_config ] }
