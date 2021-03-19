@@ -125,7 +125,7 @@ node_templates:
       network:
         name: { get_input: network_id }
         vlan_id: { get_input: vlan_id }
-        vswitch_name: vSwitch0
+        vswitch_name: RS02-INFRA
         switch_distributed: true
 
   # storage:
