@@ -48,6 +48,10 @@ inputs:
     description: >
       Static IP for private overlay. Must be out of DHCP pool scope.
 
+  storage_size:
+    type: integer
+    default: 1
+
 dsl_definitions:
 
   connection_config: &connection_config
