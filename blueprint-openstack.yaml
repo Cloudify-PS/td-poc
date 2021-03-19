@@ -197,3 +197,8 @@ node_templates:
           implementation: keys.cloudify_ssh_key.operations.create
           inputs:
             store_private_key_material: true
+
+outputs:
+  server_endpoint:
+    description: IP of the Web Application
+    value: { get_attribute: [vm, public_ip_address] }

@@ -82,7 +82,6 @@ node_templates:
       networking:
         connect_networks:
           - name: { get_attribute: [segment, id] }
-            # nsx_t_switch: true
             switch_distributed: true
             use_dhcp: true
     relationships:
@@ -103,6 +102,8 @@ node_templates:
         subnet:
           ip_v4_config:
             dhcp_config:
+              dns_servers:
+                - "8.8.8.8"
               server_address: 172.18.125.2/24
               lease_time: 86400
               resource_type: SegmentDhcpV4Config
@@ -157,3 +158,8 @@ node_templates:
           - TIER1_LB_VIP
           - TIER1_LB_SNAT
           - TIER1_DNS_FORWARDER_IP
+
+outputs:
+  server_endpoint:
+    description: IP of the Web Application
+    value: { get_attribute: [vm, ip] }
