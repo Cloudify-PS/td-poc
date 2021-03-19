@@ -203,3 +203,11 @@ node_templates:
         display_name: cfy-tier1
         description: Tier 1 Config
         tier0_path: /infra/tier-0s/RS02-Tier0-Workload
+        route_advertisement_types:
+          - TIER1_STATIC_ROUTES
+          - TIER1_CONNECTED
+          - TIER1_NAT
+          - TIER1_IPSEC_LOCAL_ENDPOINT
+          - TIER1_LB_VIP
+          - TIER1_LB_SNAT
+          - TIER1_DNS_FORWARDER_IP
