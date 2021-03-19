@@ -13,14 +13,14 @@ inputs:
     type: string
     default: cfy_app_vm
 
-  cpus:
+  server_cpus:
     type: integer
     description: Number of CPUs the VM should have.
     default: 1
     constraints:
       - in_range: [1, 4]
 
-  memory:
+  server_memory:
     type: integer
     description: Amount of memory (in MB) the VM should have.
     default: 2048
@@ -39,14 +39,6 @@ inputs:
     type: integer
     description: vLAN ID used in network.
     default: 91
-
-  overlay_static_ip:
-    type: string
-    default: 10.33.10.11
-    constraints:
-      - pattern: "10\\.33\\.10\\.(1?[1-9][0-9]?|2[0-4][0-9]|25[0-5])"
-    description: >
-      Static IP for private overlay. Must be out of DHCP pool scope.
 
   storage_size:
     type: integer
@@ -79,65 +71,23 @@ node_templates:
       connection_config: *connection_config
       agent_config:
         install_method: remote
+        user: centos
+        password: { get_secret: vm_password }
       server:
-        template: Centos7.2009-tmpl
-        cpus: { get_input: cpus }
-        memory: { get_input: memory }
+        template: CentOS-7.8.2003-TD
+        cpus: { get_input: server_cpus }
+        memory: { get_input: server_memory }
         name: { get_input: server_name }
       wait_ip: true
       networking:
         connect_networks:
           - name: { get_attribute: [segment, id] }
-            nsx_t_switch: true
+            # nsx_t_switch: true
+            switch_distributed: true
             use_dhcp: true
     relationships:
-      - type: cloudify.relationships.server_connected_to_segment
+      - type: cloudify.relationships.connected_to
         target: segment
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            preconfigure:
-              inputs:
-                ip_v4_address: { get_input: overlay_static_ip }
-
-  vm_port:
-    type: cloudify.vsphere.nodes.NIC
-    properties:
-      connection_config: *connection_config
-      name: { get_input: network_id }
-    #   switch_distributed: false
-    #   network_configuration:
-    #     management: true
-    #     external: true
-    #     switch_distributed: false
-    #     use_dhcp: false
-    #     network: 172.16.168.0/24
-    #     gateway: 172.16.168.1
-    #     ip: { get_input: ip_address }
-    # relationships:
-    #   - type: cloudify.relationships.vsphere.nic_connected_to_network
-    #     target: network
-
-  network:
-    type: cloudify.vsphere.nodes.Network
-    properties:
-      use_existing_resource: false
-      connection_config: *connection_config
-      network:
-        name: { get_input: network_id }
-        vlan_id: { get_input: vlan_id }
-        vswitch_name: vSwitch0
-        switch_distributed: false
-
-  storage:
-    type: cloudify.vsphere.nodes.Storage
-    properties:
-      use_existing_resource: false
-      connection_config: *connection_config
-      storage:
-        storage_size: { get_input: storage_size }
-        parent_key: -1
-        thin_provision: false
-        mode: persistent
 
   segment:
     type: cloudify.nodes.nsx-t.Segment
@@ -147,19 +97,18 @@ node_templates:
         id: cfy-segment
         display_name: cfy-segment
         description: NSX-T Segment Config
-        # transport_zone_path RS02-INFRA-VDS-OVERLAY-TZ | Overlay
         transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/b3f9ae8b-cdf1-4369-a74e-e59d954a880b
         connectivity_path: { get_attribute: [tier1, resource_config, path] }
         dhcp_config_path: { get_attribute: [dhcp_server_config, resource_config, path] }
         subnet:
           ip_v4_config:
             dhcp_config:
-              server_address: 10.33.10.2/24
+              server_address: 172.18.125.2/24
               lease_time: 86400
               resource_type: SegmentDhcpV4Config
-            gateway_address: 10.33.10.1/24
+            gateway_address: 172.18.125.1/24
             dhcp_ranges:
-              - 10.33.10.3-10.33.10.10
+              - 172.18.125.10-172.18.125.255
           ip_v6_config:
             dhcp_config:
               server_address: 2001:ab8::2/64
@@ -184,7 +133,7 @@ node_templates:
         description: DHCP Server Config
         edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/57edb96e-3081-4d3a-8ffa-3b64462dd693
         server_addresses:
-          - 10.33.10.2/24
+          - 172.18.125.2/24
           - 2001:ab8::2/64
         lease_time: 86400
     relationships:
@@ -200,3 +149,11 @@ node_templates:
         display_name: cfy-tier1
         description: Tier 1 Config
         tier0_path: /infra/tier-0s/RS02-Tier0-Workload
+        route_advertisement_types:
+          - TIER1_STATIC_ROUTES
+          - TIER1_CONNECTED
+          - TIER1_NAT
+          - TIER1_IPSEC_LOCAL_ENDPOINT
+          - TIER1_LB_VIP
+          - TIER1_LB_SNAT
+          - TIER1_DNS_FORWARDER_IP
