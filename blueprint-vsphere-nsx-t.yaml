@@ -82,7 +82,7 @@ node_templates:
         user: centos
         password: { get_secret: vm_password }
       server:
-        template: Centos7.2009-tmpl
+        template: CentOS-7.8.2003-TD
         cpus: { get_input: server_cpus }
         memory: { get_input: server_memory }
         name: { get_input: server_name }
