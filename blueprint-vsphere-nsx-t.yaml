@@ -79,6 +79,8 @@ node_templates:
       connection_config: *connection_config
       agent_config:
         install_method: remote
+        user: centos
+        password: { get_secret: vm_password }
       server:
         template: Centos7.2009-tmpl
         cpus: { get_input: server_cpus }
