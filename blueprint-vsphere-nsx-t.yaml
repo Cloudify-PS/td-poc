@@ -128,16 +128,16 @@ node_templates:
         vswitch_name: vSwitch0
         switch_distributed: true
 
-  storage:
-    type: cloudify.vsphere.nodes.Storage
-    properties:
-      use_existing_resource: false
-      connection_config: *connection_config
-      storage:
-        storage_size: { get_input: storage_size }
-        parent_key: -1
-        thin_provision: false
-        mode: persistent
+  # storage:
+  #   type: cloudify.vsphere.nodes.Storage
+  #   properties:
+  #     use_existing_resource: false
+  #     connection_config: *connection_config
+  #     storage:
+  #       storage_size: { get_input: storage_size }
+  #       parent_key: -1
+  #       thin_provision: false
+  #       mode: persistent
 
   segment:
     type: cloudify.nodes.nsx-t.Segment
