@@ -76,8 +76,7 @@ node_templates:
       agent_config:
         install_method: remote
       server:
-        # todo check template name
-        template: CentOS-7.8.2003-tmpl
+        template: Centos7.2009-tmpl
         cpus: { get_input: cpus }
         memory: { get_input: memory }
         name: { get_input: server_name }
@@ -144,8 +143,8 @@ node_templates:
         id: cfy-segment
         display_name: cfy-segment
         description: NSX-T Segment Config
-        # todo check path
-        transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/1b3a2f36-bfd1-443e-a0f6-4de01abc963e
+        # transport_zone_path RS02-INFRA-VDS-OVERLAY-TZ | Overlay
+        transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/b3f9ae8b-cdf1-4369-a74e-e59d954a880b
         connectivity_path: { get_attribute: [tier1, resource_config, path] }
         dhcp_config_path: { get_attribute: [dhcp_server_config, resource_config, path] }
         subnet:
@@ -179,8 +178,7 @@ node_templates:
         id: cfy-dhcp
         display_name: cfy-dhcp
         description: DHCP Server Config
-        # todo Check the path
-        # edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/272cfe43-ebcc-49bb-8471-62a261ed8931
+        edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/57edb96e-3081-4d3a-8ffa-3b64462dd693
         server_addresses:
           - 10.33.10.2/24
           - 2001:ab8::2/64
@@ -197,5 +195,4 @@ node_templates:
         id: cfy-tier1
         display_name: cfy-tier1
         description: Tier 1 Config
-        # todo check path
-        tier0_path: /infra/tier-0s/tier0
+        tier0_path: /infra/tier-0s/RS02-Tier0-Workload
