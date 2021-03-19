@@ -40,14 +40,6 @@ inputs:
     description: vLAN ID used in network.
     default: 91
 
-  overlay_static_ip:
-    type: string
-    default: 10.33.10.11
-    constraints:
-      - pattern: "10\\.33\\.10\\.(1?[1-9][0-9]?|2[0-4][0-9]|25[0-5])"
-    description: >
-      Static IP for private overlay. Must be out of DHCP pool scope.
-
   storage_size:
     type: integer
     default: 1
@@ -90,17 +82,12 @@ node_templates:
       networking:
         connect_networks:
           - name: { get_attribute: [segment, id] }
-            nsx_t_switch: true
-            # switch_distributed: true
+            # nsx_t_switch: true
+            switch_distributed: true
             use_dhcp: true
     relationships:
       - type: cloudify.relationships.server_connected_to_segment
         target: segment
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            preconfigure:
-              inputs:
-                ip_v4_address: { get_input: overlay_static_ip }
 
   vm_port:
     type: cloudify.vsphere.nodes.NIC
@@ -157,20 +144,20 @@ node_templates:
         subnet:
           ip_v4_config:
             dhcp_config:
-              server_address: 10.33.10.2/24
+              server_address: 172.18.130.2/24
               lease_time: 86400
               resource_type: SegmentDhcpV4Config
-            gateway_address: 10.33.10.1/24
+            gateway_address: 172.18.130.1/24
             dhcp_ranges:
-              - 10.33.10.3-10.33.10.10
-          ip_v6_config:
-            dhcp_config:
-              server_address: 2001:ab8::2/64
-              lease_time: 86400
-              resource_type: SegmentDhcpV6Config
-            gateway_address: 2001:ab8::1/64
-            dhcp_ranges:
-              - 2001:ab8::3-2001:ab8::100
+              - 172.18.130.10-172.18.130.255
+          # ip_v6_config:
+          #   dhcp_config:
+          #     server_address: 2001:ab8::2/64
+          #     lease_time: 86400
+          #     resource_type: SegmentDhcpV6Config
+          #   gateway_address: 2001:ab8::1/64
+          #   dhcp_ranges:
+          #     - 2001:ab8::3-2001:ab8::100
     relationships:
       - type: cloudify.relationships.connected_to
         target: tier1
@@ -188,7 +175,7 @@ node_templates:
         edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/57edb96e-3081-4d3a-8ffa-3b64462dd693
         server_addresses:
           - 10.33.10.2/24
-          - 2001:ab8::2/64
+          # - 2001:ab8::2/64
         lease_time: 86400
     relationships:
       - type: cloudify.relationships.depends_on
