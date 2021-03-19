@@ -86,48 +86,37 @@ node_templates:
             switch_distributed: true
             use_dhcp: true
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: segment
 
-  vm_port:
-    type: cloudify.vsphere.nodes.NIC
-    properties:
-      connection_config: *connection_config
-      name: { get_input: network_id }
-    #   switch_distributed: false
-    #   network_configuration:
-    #     management: true
-    #     external: true
-    #     switch_distributed: false
-    #     use_dhcp: false
-    #     network: 172.16.168.0/24
-    #     gateway: 172.16.168.1
-    #     ip: { get_input: ip_address }
-    # relationships:
-    #   - type: cloudify.relationships.vsphere.nic_connected_to_network
-    #     target: network
+  # vm_port:
+  #   type: cloudify.vsphere.nodes.NIC
+  #   properties:
+  #     connection_config: *connection_config
+  #     name: { get_input: network_id }
+  #   #   switch_distributed: false
+  #   #   network_configuration:
+  #   #     management: true
+  #   #     external: true
+  #   #     switch_distributed: false
+  #   #     use_dhcp: false
+  #   #     network: 172.16.168.0/24
+  #   #     gateway: 172.16.168.1
+  #   #     ip: { get_input: ip_address }
+  #   # relationships:
+  #   #   - type: cloudify.relationships.vsphere.nic_connected_to_network
+  #   #     target: network
 
-  network:
-    type: cloudify.vsphere.nodes.Network
-    properties:
-      use_existing_resource: false
-      connection_config: *connection_config
-      network:
-        name: { get_input: network_id }
-        vlan_id: { get_input: vlan_id }
-        vswitch_name: RS02-INFRA
-        switch_distributed: true
-
-  # storage:
-  #   type: cloudify.vsphere.nodes.Storage
+  # network:
+  #   type: cloudify.vsphere.nodes.Network
   #   properties:
   #     use_existing_resource: false
   #     connection_config: *connection_config
-  #     storage:
-  #       storage_size: { get_input: storage_size }
-  #       parent_key: -1
-  #       thin_provision: false
-  #       mode: persistent
+  #     network:
+  #       name: { get_input: network_id }
+  #       vlan_id: { get_input: vlan_id }
+  #       vswitch_name: RS02-INFRA
+  #       switch_distributed: true
 
   segment:
     type: cloudify.nodes.nsx-t.Segment
