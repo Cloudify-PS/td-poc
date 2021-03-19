@@ -150,14 +150,14 @@ node_templates:
             gateway_address: 172.18.130.1/24
             dhcp_ranges:
               - 172.18.130.10-172.18.130.255
-          # ip_v6_config:
-          #   dhcp_config:
-          #     server_address: 2001:ab8::2/64
-          #     lease_time: 86400
-          #     resource_type: SegmentDhcpV6Config
-          #   gateway_address: 2001:ab8::1/64
-          #   dhcp_ranges:
-          #     - 2001:ab8::3-2001:ab8::100
+          ip_v6_config:
+            dhcp_config:
+              server_address: 2001:ab8::2/64
+              lease_time: 86400
+              resource_type: SegmentDhcpV6Config
+            gateway_address: 2001:ab8::1/64
+            dhcp_ranges:
+              - 2001:ab8::3-2001:ab8::100
     relationships:
       - type: cloudify.relationships.connected_to
         target: tier1
@@ -175,7 +175,7 @@ node_templates:
         edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/57edb96e-3081-4d3a-8ffa-3b64462dd693
         server_addresses:
           - 10.33.10.2/24
-          # - 2001:ab8::2/64
+          - 2001:ab8::2/64
         lease_time: 86400
     relationships:
       - type: cloudify.relationships.depends_on
