@@ -5,7 +5,7 @@ inputs:
   website_message:
     type: string
     description: Text to be displayed on the webpage.
-    default: Cloudify hello world!
+    default: Hello world!
 
 node_templates:
 

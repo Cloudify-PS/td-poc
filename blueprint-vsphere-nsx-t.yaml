@@ -82,7 +82,6 @@ node_templates:
       networking:
         connect_networks:
           - name: { get_attribute: [segment, id] }
-            # nsx_t_switch: true
             switch_distributed: true
             use_dhcp: true
     relationships:
