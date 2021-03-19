@@ -89,35 +89,6 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: segment
 
-  # vm_port:
-  #   type: cloudify.vsphere.nodes.NIC
-  #   properties:
-  #     connection_config: *connection_config
-  #     name: { get_input: network_id }
-  #   #   switch_distributed: false
-  #   #   network_configuration:
-  #   #     management: true
-  #   #     external: true
-  #   #     switch_distributed: false
-  #   #     use_dhcp: false
-  #   #     network: 172.16.168.0/24
-  #   #     gateway: 172.16.168.1
-  #   #     ip: { get_input: ip_address }
-  #   # relationships:
-  #   #   - type: cloudify.relationships.vsphere.nic_connected_to_network
-  #   #     target: network
-
-  # network:
-  #   type: cloudify.vsphere.nodes.Network
-  #   properties:
-  #     use_existing_resource: false
-  #     connection_config: *connection_config
-  #     network:
-  #       name: { get_input: network_id }
-  #       vlan_id: { get_input: vlan_id }
-  #       vswitch_name: RS02-INFRA
-  #       switch_distributed: true
-
   segment:
     type: cloudify.nodes.nsx-t.Segment
     properties:
@@ -126,19 +97,18 @@ node_templates:
         id: cfy-segment
         display_name: cfy-segment
         description: NSX-T Segment Config
-        # transport_zone_path RS02-INFRA-VDS-OVERLAY-TZ | Overlay
         transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/b3f9ae8b-cdf1-4369-a74e-e59d954a880b
         connectivity_path: { get_attribute: [tier1, resource_config, path] }
         dhcp_config_path: { get_attribute: [dhcp_server_config, resource_config, path] }
         subnet:
           ip_v4_config:
             dhcp_config:
-              server_address: 172.18.130.2/24
+              server_address: 172.18.125.2/24
               lease_time: 86400
               resource_type: SegmentDhcpV4Config
-            gateway_address: 172.18.130.1/24
+            gateway_address: 172.18.125.1/24
             dhcp_ranges:
-              - 172.18.130.10-172.18.130.255
+              - 172.18.125.10-172.18.125.255
           ip_v6_config:
             dhcp_config:
               server_address: 2001:ab8::2/64
@@ -163,7 +133,7 @@ node_templates:
         description: DHCP Server Config
         edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/57edb96e-3081-4d3a-8ffa-3b64462dd693
         server_addresses:
-          - 10.33.10.2/24
+          - 172.18.125.2/24
           - 2001:ab8::2/64
         lease_time: 86400
     relationships:
