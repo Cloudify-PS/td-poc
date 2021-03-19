@@ -102,6 +102,8 @@ node_templates:
         subnet:
           ip_v4_config:
             dhcp_config:
+              dns_servers:
+                - "8.8.8.8"
               server_address: 172.18.125.2/24
               lease_time: 86400
               resource_type: SegmentDhcpV4Config
