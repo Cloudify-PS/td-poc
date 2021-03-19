@@ -86,7 +86,7 @@ node_templates:
             switch_distributed: true
             use_dhcp: true
     relationships:
-      - type: cloudify.relationships.server_connected_to_segment
+      - type: cloudify.relationships.depends_on
         target: segment
 
   vm_port:
