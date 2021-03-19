@@ -91,7 +91,6 @@ node_templates:
         connect_networks:
           - name: { get_attribute: [segment, id] }
             nsx_t_switch: true
-            switch_distributed: true
             use_dhcp: true
     relationships:
       - type: cloudify.relationships.server_connected_to_segment
