@@ -158,3 +158,8 @@ node_templates:
           - TIER1_LB_VIP
           - TIER1_LB_SNAT
           - TIER1_DNS_FORWARDER_IP
+
+outputs:
+  server_endpoint:
+    description: IP of the Web Application
+    value: { get_attribute: [vm, ip] }
