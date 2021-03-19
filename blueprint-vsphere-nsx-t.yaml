@@ -13,14 +13,14 @@ inputs:
     type: string
     default: cfy_app_vm
 
-  cpus:
+  server_cpus:
     type: integer
     description: Number of CPUs the VM should have.
     default: 1
     constraints:
       - in_range: [1, 4]
 
-  memory:
+  server_memory:
     type: integer
     description: Amount of memory (in MB) the VM should have.
     default: 2048
@@ -81,14 +81,15 @@ node_templates:
         install_method: remote
       server:
         template: Centos7.2009-tmpl
-        cpus: { get_input: cpus }
-        memory: { get_input: memory }
+        cpus: { get_input: server_cpus }
+        memory: { get_input: server_memory }
         name: { get_input: server_name }
       wait_ip: true
       networking:
         connect_networks:
           - name: { get_attribute: [segment, id] }
             nsx_t_switch: true
+            switch_distributed: true
             use_dhcp: true
     relationships:
       - type: cloudify.relationships.server_connected_to_segment
