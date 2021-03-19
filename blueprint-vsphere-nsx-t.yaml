@@ -126,7 +126,7 @@ node_templates:
         name: { get_input: network_id }
         vlan_id: { get_input: vlan_id }
         vswitch_name: vSwitch0
-        switch_distributed: false
+        switch_distributed: true
 
   storage:
     type: cloudify.vsphere.nodes.Storage
