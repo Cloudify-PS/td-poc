@@ -4,7 +4,7 @@ imports:
   - http://cloudify.co/spec/cloudify/5.0.5/types.yaml
   - plugin:cloudify-nsx-t-plugin
   - plugin:cloudify-vsphere-plugin
-  - common/common.yaml
+  - common/application.yaml
 
 inputs:
 
